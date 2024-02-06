@@ -28,6 +28,26 @@ func (mockProfile) TableName() string {
 	return "mock_profile"
 }
 
+func TestPreload_None(t *testing.T) {
+	db, mock, err := test.DB()
+	assert.NoError(t, err)
+
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `mock_user`")).
+		WillReturnRows(mock.NewRows([]string{"id", "name"}).AddRow(1, "vuhk").AddRow(2, "vuho"))
+	var res []mockUser
+
+	p := &preload{
+		field: "",
+		ptype: "",
+		args:  nil,
+	}
+
+	db = p.Apply(db.Model(mockUser{})).Find(&res)
+
+	assert.NoError(t, db.Error)
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
 func TestPreload(t *testing.T) {
 	db, mock, err := test.DB()
 	assert.NoError(t, err)

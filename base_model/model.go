@@ -11,7 +11,10 @@ type IModel interface {
 }
 
 type Model struct {
-	gorm.Model
+	ID        uint `gorm:"primaryKey"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
 	CreatedBy string
 	UpdatedBy string
 }

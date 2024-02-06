@@ -7,12 +7,12 @@ import (
 	"testing"
 )
 
-type MockModel struct {
+type mockModel struct {
 	Name string
 	Age  int
 }
 
-func (MockModel) TableName() string {
+func (mockModel) TableName() string {
 	return "model"
 }
 
@@ -24,9 +24,9 @@ func TestEqual(t *testing.T) {
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `model` WHERE name = ?")).
 		WithArgs("vuhk").
 		WillReturnRows(mock.NewRows([]string{"name"}).AddRow("vuhk"))
-	var res []MockModel
+	var res []mockModel
 
-	assert.NoError(t, db.Model(MockModel{}).Scopes(c).Find(&res).Error)
+	assert.NoError(t, db.Model(mockModel{}).Scopes(c).Find(&res).Error)
 
 	assert.NoError(t, mock.ExpectationsWereMet())
 }
@@ -39,9 +39,9 @@ func TestLike(t *testing.T) {
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `model` WHERE name LIKE ?")).
 		WithArgs("%vuhk%").
 		WillReturnRows(mock.NewRows([]string{"name"}).AddRow("vuhk"))
-	var res []MockModel
+	var res []mockModel
 
-	assert.NoError(t, db.Model(MockModel{}).Scopes(c).Find(&res).Error)
+	assert.NoError(t, db.Model(mockModel{}).Scopes(c).Find(&res).Error)
 
 	assert.NoError(t, mock.ExpectationsWereMet())
 }
@@ -54,9 +54,9 @@ func TestStartWith(t *testing.T) {
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `model` WHERE name LIKE ?")).
 		WithArgs("vuhk%").
 		WillReturnRows(mock.NewRows([]string{"name"}).AddRow("vuhk"))
-	var res []MockModel
+	var res []mockModel
 
-	assert.NoError(t, db.Model(MockModel{}).Scopes(c).Find(&res).Error)
+	assert.NoError(t, db.Model(mockModel{}).Scopes(c).Find(&res).Error)
 
 	assert.NoError(t, mock.ExpectationsWereMet())
 }
@@ -69,9 +69,9 @@ func TestEndWith(t *testing.T) {
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `model` WHERE name LIKE ?")).
 		WithArgs("%vuhk").
 		WillReturnRows(mock.NewRows([]string{"name"}).AddRow("vuhk"))
-	var res []MockModel
+	var res []mockModel
 
-	assert.NoError(t, db.Model(MockModel{}).Scopes(c).Find(&res).Error)
+	assert.NoError(t, db.Model(mockModel{}).Scopes(c).Find(&res).Error)
 
 	assert.NoError(t, mock.ExpectationsWereMet())
 }
@@ -84,9 +84,9 @@ func TestIn(t *testing.T) {
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `model` WHERE name IN (?,?)")).
 		WithArgs("vuhk", "vuhk1").
 		WillReturnRows(mock.NewRows([]string{"name"}).AddRow("vuhk"))
-	var res []MockModel
+	var res []mockModel
 
-	assert.NoError(t, db.Model(MockModel{}).Scopes(c).Find(&res).Error)
+	assert.NoError(t, db.Model(mockModel{}).Scopes(c).Find(&res).Error)
 
 	assert.NoError(t, mock.ExpectationsWereMet())
 }
@@ -98,15 +98,15 @@ func TestNonZero(t *testing.T) {
 
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `model`")).
 		WillReturnRows(mock.NewRows([]string{"name"}).AddRow("vuhk"))
-	var res []MockModel
+	var res []mockModel
 
-	assert.NoError(t, db.Model(MockModel{}).Scopes(c).Find(&res).Error)
+	assert.NoError(t, db.Model(mockModel{}).Scopes(c).Find(&res).Error)
 
 	c = NonZero("vuhk", Equal("name", "vuhk"))
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `model` WHERE name = ?")).
 		WithArgs("vuhk").
 		WillReturnRows(mock.NewRows([]string{"name"}).AddRow("vuhk"))
-	assert.NoError(t, db.Model(MockModel{}).Scopes(c).Find(&res).Error)
+	assert.NoError(t, db.Model(mockModel{}).Scopes(c).Find(&res).Error)
 
 	assert.NoError(t, mock.ExpectationsWereMet())
 }
@@ -119,9 +119,9 @@ func TestAnd(t *testing.T) {
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `model` WHERE name = ? AND age = ?")).
 		WithArgs("vuhk", 20).
 		WillReturnRows(mock.NewRows([]string{"name"}).AddRow("vuhk"))
-	var res []MockModel
+	var res []mockModel
 
-	assert.NoError(t, db.Model(MockModel{}).Scopes(c).Find(&res).Error)
+	assert.NoError(t, db.Model(mockModel{}).Scopes(c).Find(&res).Error)
 
 	assert.NoError(t, mock.ExpectationsWereMet())
 }
@@ -134,9 +134,9 @@ func TestOr(t *testing.T) {
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `model` WHERE name = ? OR name = ?")).
 		WithArgs("vuhk", "vu").
 		WillReturnRows(mock.NewRows([]string{"name"}).AddRow("vuhk"))
-	var res []MockModel
+	var res []mockModel
 
-	assert.NoError(t, db.Model(MockModel{}).Scopes(c).Find(&res).Error)
+	assert.NoError(t, db.Model(mockModel{}).Scopes(c).Find(&res).Error)
 
 	assert.NoError(t, mock.ExpectationsWereMet())
 }
@@ -149,9 +149,9 @@ func TestAndOr(t *testing.T) {
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `model` WHERE (name = ? OR name = ?) AND age = ?")).
 		WithArgs("vuhk", "vu", 20).
 		WillReturnRows(mock.NewRows([]string{"name"}).AddRow("vuhk"))
-	var res []MockModel
+	var res []mockModel
 
-	assert.NoError(t, db.Model(MockModel{}).Scopes(c).Find(&res).Error)
+	assert.NoError(t, db.Model(mockModel{}).Scopes(c).Find(&res).Error)
 
 	assert.NoError(t, mock.ExpectationsWereMet())
 }

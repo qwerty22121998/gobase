@@ -15,6 +15,14 @@ const (
 )
 
 type IRepository[T base_model.IModel] interface {
+	DB(ctx context.Context) *gorm.DB
+	Create(ctx context.Context, data T) error
+	Save(ctx context.Context, data T) error
+	Delete(ctx context.Context, data T) error
+	FindByID(ctx context.Context, id uint) (T, error)
+	FindFirst(ctx context.Context, q query.Condition, preloads ...preload.Opt) (T, error)
+	FindMany(ctx context.Context, q query.Condition, p *pagination.Pagination, preloads ...preload.Opt) ([]T, error)
+	BeginTx(ctx context.Context, fn func(ctx context.Context) error) error
 }
 
 type repository[T base_model.IModel] struct {
@@ -23,6 +31,13 @@ type repository[T base_model.IModel] struct {
 
 func New[T base_model.IModel](db *gorm.DB) IRepository[T] {
 	return &repository[T]{db: db}
+}
+
+func (r *repository[T]) BeginTx(ctx context.Context, fn func(ctx context.Context) error) error {
+	return r.DB(ctx).Transaction(func(tx *gorm.DB) error {
+		ctx = context.WithValue(ctx, ContextDBKey, tx)
+		return fn(ctx)
+	})
 }
 
 func (r *repository[T]) DB(ctx context.Context) *gorm.DB {
@@ -36,7 +51,7 @@ func (r *repository[T]) DB(ctx context.Context) *gorm.DB {
 func (r *repository[T]) Create(ctx context.Context, data T) error {
 	data.SetCreated(base_util.GetUser(ctx), base_util.GetNow(ctx))
 	data.SetUpdated(base_util.GetUser(ctx), base_util.GetNow(ctx))
-	return r.DB(ctx).Create(data).Error
+	return r.DB(ctx).Model(data).Create(data).Error
 }
 
 func (r *repository[T]) Save(ctx context.Context, data T) error {
@@ -45,12 +60,22 @@ func (r *repository[T]) Save(ctx context.Context, data T) error {
 }
 
 func (r *repository[T]) Delete(ctx context.Context, data T) error {
-	return r.DB(ctx).Delete(data).Error
+	return r.DB(ctx).Model(data).Delete(data).Error
 }
 
 func (r *repository[T]) FindByID(ctx context.Context, id uint) (T, error) {
 	var result T
-	err := r.DB(ctx).First(&result, id).Error
+	err := r.DB(ctx).Model(result).First(&result, id).Error
+	return result, err
+}
+
+func (r *repository[T]) FindFirst(ctx context.Context, q query.Condition, preloads ...preload.Opt) (T, error) {
+	var result T
+	zero := new(T)
+	db := r.DB(ctx).Model(zero)
+	db = db.Scopes(q)
+	db = preload.Group(preloads...).Apply(db)
+	err := db.First(&result).Error
 	return result, err
 }
 

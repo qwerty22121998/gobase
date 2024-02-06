@@ -7,8 +7,8 @@ import (
 )
 
 var (
-	MinPage  = 1
-	MinLimit = 20
+	MinPage      = 1
+	DefaultLimit = 0
 )
 
 type OrderDirection string
@@ -72,8 +72,8 @@ func (p *Pagination) Apply(db *gorm.DB) *gorm.DB {
 
 func (p *Pagination) Correct() {
 	p.parseOrder()
-	if p.Limit < MinLimit {
-		p.Limit = MinLimit
+	if p.Limit <= 0 {
+		p.Limit = DefaultLimit
 	}
 	if p.Page < MinPage {
 		p.Page = MinPage
