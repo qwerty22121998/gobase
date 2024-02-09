@@ -38,7 +38,7 @@ func TestSuccessPagination(t *testing.T) {
 		TotalPage: 1,
 		Page:      1,
 	}
-	r := SuccessPagination[string]("hello world", p, "OK").WithDebug("debug")
+	r := SuccessPagination("hello world", p, "OK").WithDebug("debug")
 	j, err := json.Marshal(r)
 	assert.NoError(t, err)
 	expected := `

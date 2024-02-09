@@ -12,18 +12,18 @@ type Meta struct {
 	Debug   any    `json:"debug,omitempty"`
 }
 
-type Response[T any] struct {
+type Response struct {
 	Meta Meta `json:"meta"`
-	Data *T   `json:"data,omitempty"`
+	Data any  `json:"data,omitempty"`
 }
 
-func (r *Response[T]) WithDebug(data any) *Response[T] {
+func (r *Response) WithDebug(data any) *Response {
 	r.Meta.Debug = data
 	return r
 }
 
-func SuccessPagination[T any](data T, p *pagination.Pagination, message string) *Response[T] {
-	return &Response[T]{
+func SuccessPagination(data any, p *pagination.Pagination, message string) *Response {
+	return &Response{
 		Meta: Meta{
 			Pagination: p,
 			Code:       http.StatusOK,
@@ -33,8 +33,8 @@ func SuccessPagination[T any](data T, p *pagination.Pagination, message string) 
 	}
 }
 
-func Info(message string) *Response[any] {
-	return &Response[any]{
+func Info(message string) *Response {
+	return &Response{
 		Meta: Meta{
 			Code:    http.StatusOK,
 			Message: message,
@@ -42,8 +42,8 @@ func Info(message string) *Response[any] {
 	}
 }
 
-func Success[T any](data T, message string) *Response[T] {
-	return &Response[T]{
+func Success[T any](data T, message string) *Response {
+	return &Response{
 		Meta: Meta{
 			Code:    http.StatusOK,
 			Message: message,
@@ -52,8 +52,8 @@ func Success[T any](data T, message string) *Response[T] {
 	}
 }
 
-func BadRequest(message string) *Response[any] {
-	return &Response[any]{
+func BadRequest(message string) *Response {
+	return &Response{
 		Meta: Meta{
 			Code:    http.StatusBadRequest,
 			Message: message,
@@ -61,8 +61,8 @@ func BadRequest(message string) *Response[any] {
 	}
 }
 
-func InternalError(err error) *Response[any] {
-	return &Response[any]{
+func InternalError(err error) *Response {
+	return &Response{
 		Meta: Meta{
 			Code:    http.StatusInternalServerError,
 			Message: err.Error(),
