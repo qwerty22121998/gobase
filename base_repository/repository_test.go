@@ -164,3 +164,71 @@ func TestRepository_FindMany(t *testing.T) {
 	assert.Equal(t, int64(1), p.TotalPage)
 	assert.NoError(t, mock.ExpectationsWereMet())
 }
+
+func TestRepository_FindManyFailCount(t *testing.T) {
+	db, mock, err := test.DB()
+	assert.NoError(t, err)
+
+	q := query.And(query.Equal("a", "A"))
+	p := pagination.Pagination{
+		Page:      0,
+		Limit:     10,
+		Total:     0,
+		TotalPage: 0,
+		Order:     "-id",
+	}
+
+	repo := New[*test.ModelA](db)
+
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT count(*) FROM `model_a` WHERE a = ? AND `model_a`.`deleted_at` IS NULL")).
+		WithArgs("A").
+		WillReturnError(assert.AnError)
+
+	_, err = repo.FindMany(context.Background(), q, &p)
+	assert.Error(t, err)
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestRepository_FindManyFailData(t *testing.T) {
+	db, mock, err := test.DB()
+	assert.NoError(t, err)
+
+	q := query.And(query.Equal("a", "A"))
+	p := pagination.Pagination{
+		Page:      0,
+		Limit:     10,
+		Total:     0,
+		TotalPage: 0,
+		Order:     "-id",
+	}
+
+	repo := New[*test.ModelA](db)
+
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT count(*) FROM `model_a` WHERE a = ? AND `model_a`.`deleted_at` IS NULL")).
+		WithArgs("A").
+		WillReturnRows(mock.NewRows([]string{"count(*)"}).AddRow(1))
+
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `model_a` WHERE a = ? AND `model_a`.`deleted_at` IS NULL LIMIT 10")).
+		WithArgs("A").
+		WillReturnError(assert.AnError)
+
+	_, err = repo.FindMany(context.Background(), q, &p)
+	assert.Error(t, err)
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestRepository_BeginTx(t *testing.T) {
+	db, mock, err := test.DB()
+	assert.NoError(t, err)
+
+	repo := New[*test.ModelA](db)
+
+	mock.ExpectBegin()
+	mock.ExpectCommit()
+
+	err = repo.BeginTx(context.Background(), func(ctx context.Context) error {
+		return nil
+	})
+	assert.NoError(t, err)
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
