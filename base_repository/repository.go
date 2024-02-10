@@ -25,22 +25,22 @@ type IRepository[T base_model.IModel] interface {
 	BeginTx(ctx context.Context, fn func(ctx context.Context) error) error
 }
 
-type repository[T base_model.IModel] struct {
+type Repository[T base_model.IModel] struct {
 	db *gorm.DB
 }
 
 func New[T base_model.IModel](db *gorm.DB) IRepository[T] {
-	return &repository[T]{db: db}
+	return &Repository[T]{db: db}
 }
 
-func (r *repository[T]) BeginTx(ctx context.Context, fn func(ctx context.Context) error) error {
+func (r *Repository[T]) BeginTx(ctx context.Context, fn func(ctx context.Context) error) error {
 	return r.DB(ctx).Transaction(func(tx *gorm.DB) error {
 		ctx = context.WithValue(ctx, ContextDBKey, tx)
 		return fn(ctx)
 	})
 }
 
-func (r *repository[T]) DB(ctx context.Context) *gorm.DB {
+func (r *Repository[T]) DB(ctx context.Context) *gorm.DB {
 	db, ok := ctx.Value(ContextDBKey).(*gorm.DB)
 	if !ok {
 		return r.db
@@ -48,28 +48,28 @@ func (r *repository[T]) DB(ctx context.Context) *gorm.DB {
 	return db
 }
 
-func (r *repository[T]) Create(ctx context.Context, data T) error {
+func (r *Repository[T]) Create(ctx context.Context, data T) error {
 	data.SetCreated(base_util.GetUser(ctx), base_util.GetNow(ctx))
 	data.SetUpdated(base_util.GetUser(ctx), base_util.GetNow(ctx))
 	return r.DB(ctx).Model(data).Create(data).Error
 }
 
-func (r *repository[T]) Save(ctx context.Context, data T) error {
+func (r *Repository[T]) Save(ctx context.Context, data T) error {
 	data.SetUpdated(base_util.GetUser(ctx), base_util.GetNow(ctx))
 	return r.DB(ctx).Save(data).Error
 }
 
-func (r *repository[T]) Delete(ctx context.Context, data T) error {
+func (r *Repository[T]) Delete(ctx context.Context, data T) error {
 	return r.DB(ctx).Model(data).Delete(data).Error
 }
 
-func (r *repository[T]) FindByID(ctx context.Context, id uint) (T, error) {
+func (r *Repository[T]) FindByID(ctx context.Context, id uint) (T, error) {
 	var result T
 	err := r.DB(ctx).Model(result).First(&result, id).Error
 	return result, err
 }
 
-func (r *repository[T]) FindFirst(ctx context.Context, q query.Condition, preloads ...preload.Opt) (T, error) {
+func (r *Repository[T]) FindFirst(ctx context.Context, q query.Condition, preloads ...preload.Opt) (T, error) {
 	var result T
 	zero := new(T)
 	db := r.DB(ctx).Model(zero)
@@ -79,7 +79,7 @@ func (r *repository[T]) FindFirst(ctx context.Context, q query.Condition, preloa
 	return result, err
 }
 
-func (r *repository[T]) FindMany(ctx context.Context, q query.Condition, p *pagination.Pagination, preloads ...preload.Opt) ([]T, error) {
+func (r *Repository[T]) FindMany(ctx context.Context, q query.Condition, p *pagination.Pagination, preloads ...preload.Opt) ([]T, error) {
 	res := make([]T, 0)
 	zero := new(T)
 	db := r.DB(ctx).Model(zero)
