@@ -29,8 +29,8 @@ type Repository[T base_model.IModel] struct {
 	db *gorm.DB
 }
 
-func New[T base_model.IModel](db *gorm.DB) IRepository[T] {
-	return &Repository[T]{db: db}
+func New[T base_model.IModel](db *gorm.DB) Repository[T] {
+	return Repository[T]{db: db}
 }
 
 func (r *Repository[T]) BeginTx(ctx context.Context, fn func(ctx context.Context) error) error {
@@ -80,6 +80,7 @@ func (r *Repository[T]) FindFirst(ctx context.Context, q query.Condition, preloa
 }
 
 func (r *Repository[T]) FindMany(ctx context.Context, q query.Condition, p *pagination.Pagination, preloads ...preload.Opt) ([]T, error) {
+	p.Correct()
 	res := make([]T, 0)
 	zero := new(T)
 	db := r.DB(ctx).Model(zero)

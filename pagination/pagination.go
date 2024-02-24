@@ -8,7 +8,7 @@ import (
 
 var (
 	MinPage      = 1
-	DefaultLimit = 0
+	DefaultLimit = 20
 )
 
 type OrderDirection string

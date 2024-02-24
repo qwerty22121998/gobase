@@ -1,6 +1,13 @@
 package base
 
-import "github.com/kelseyhightower/envconfig"
+import (
+	"github.com/kelseyhightower/envconfig"
+	"github.com/samber/do/v2"
+)
+
+func ParseConfigInject[T any](do.Injector) (T, error) {
+	return ParseConfig[T]()
+}
 
 func ParseConfig[T any]() (T, error) {
 	return ParseConfigWithPrefix[T]("")

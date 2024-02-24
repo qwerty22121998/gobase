@@ -153,7 +153,7 @@ func TestRepository_FindMany(t *testing.T) {
 		WithArgs("A").
 		WillReturnRows(mock.NewRows([]string{"count(*)"}).AddRow(1))
 
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `model_a` WHERE a = ? AND `model_a`.`deleted_at` IS NULL LIMIT 10")).
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `model_a` WHERE a = ? AND `model_a`.`deleted_at` IS NULL ORDER BY id DESC LIMIT 10")).
 		WithArgs("A").
 		WillReturnRows(mock.NewRows([]string{"id", "a"}).AddRow(data.ID, data.A))
 
@@ -208,7 +208,7 @@ func TestRepository_FindManyFailData(t *testing.T) {
 		WithArgs("A").
 		WillReturnRows(mock.NewRows([]string{"count(*)"}).AddRow(1))
 
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `model_a` WHERE a = ? AND `model_a`.`deleted_at` IS NULL LIMIT 10")).
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `model_a` WHERE a = ? AND `model_a`.`deleted_at` IS NULL ORDER BY id DESC LIMIT 10")).
 		WithArgs("A").
 		WillReturnError(assert.AnError)
 

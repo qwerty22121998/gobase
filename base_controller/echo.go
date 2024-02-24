@@ -1,6 +1,7 @@
 package base_controller
 
 import (
+	"context"
 	"github.com/labstack/echo/v4"
 	"github.com/qwerty22121998/gobase/api"
 	"github.com/qwerty22121998/gobase/errors"
@@ -50,16 +51,19 @@ type Validator interface {
 	Validate() error
 }
 
-func GenericServe[DTO any](c echo.Context, handler func(c echo.Context, req DTO) (*api.Response, error)) error {
+func GenericServe[DTO any](c echo.Context, handler func(c context.Context, req DTO) (*api.Response, error)) error {
 	var req DTO
 	if err := c.Bind(&req); err != nil {
-		return errors.Wrap(http.StatusBadRequest, err)
+		return ServeError(c, errors.Wrap(http.StatusBadRequest, err))
+	}
+	if err := c.Validate(req); err != nil {
+		return ServeError(c, errors.Wrap(http.StatusBadRequest, err))
 	}
 	if validator, ok := interface{}(req).(Validator); ok {
 		if err := validator.Validate(); err != nil {
-			return errors.Wrap(http.StatusBadRequest, err)
+			return ServeError(c, errors.Wrap(http.StatusBadRequest, err))
 		}
 	}
-	resp, err := handler(c, req)
+	resp, err := handler(c.Request().Context(), req)
 	return Handle(c, resp, err)
 }
