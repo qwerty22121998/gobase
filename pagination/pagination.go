@@ -78,6 +78,9 @@ func (p *Pagination) Correct() {
 	if p.Page < MinPage {
 		p.Page = MinPage
 	}
+	if p.Order == "" {
+		p.Order = "-id"
+	}
 }
 
 func (p *Pagination) SetTotal(total int64) {

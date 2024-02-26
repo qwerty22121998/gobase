@@ -22,6 +22,7 @@ type IRepository[T base_model.IModel] interface {
 	FindByID(ctx context.Context, id uint) (T, error)
 	FindFirst(ctx context.Context, q query.Condition, preloads ...preload.Opt) (T, error)
 	FindMany(ctx context.Context, q query.Condition, p *pagination.Pagination, preloads ...preload.Opt) ([]T, error)
+	FindAll(ctx context.Context, q query.Condition, preloads ...preload.Opt) ([]T, error)
 	Count(ctx context.Context, q query.Condition, preloads ...preload.Opt) (int64, error)
 	BeginTx(ctx context.Context, fn func(ctx context.Context) error) error
 }
@@ -89,6 +90,18 @@ func (r *Repository[T]) Count(ctx context.Context, q query.Condition, preloads .
 		return 0, err
 	}
 	return total, nil
+}
+
+func (r *Repository[T]) FindAll(ctx context.Context, q query.Condition, preloads ...preload.Opt) ([]T, error) {
+	res := make([]T, 0)
+	zero := new(T)
+	db := r.DB(ctx).Model(zero)
+	db = db.Scopes(q)
+	db = preload.Group(preloads...).Apply(db)
+	if err := db.Find(&res).Error; err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 func (r *Repository[T]) FindMany(ctx context.Context, q query.Condition, p *pagination.Pagination, preloads ...preload.Opt) ([]T, error) {
