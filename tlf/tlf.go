@@ -1,7 +1,7 @@
 package tlf
 
 func Map[I any, O any](arr []I, fn func(elem I) O) []O {
-	var res []O
+	res := make([]O, 0, len(arr))
 	for _, v := range arr {
 		res = append(res, fn(v))
 	}
