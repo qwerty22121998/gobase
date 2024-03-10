@@ -19,7 +19,7 @@ type IRepository[T base_model.IModel] interface {
 	Create(ctx context.Context, data T) error
 	Save(ctx context.Context, data T) error
 	Delete(ctx context.Context, data T) error
-	FindByID(ctx context.Context, id uint) (T, error)
+	FindByID(ctx context.Context, id uint, preloads ...preload.Opt) (T, error)
 	FindFirst(ctx context.Context, q query.Condition, preloads ...preload.Opt) (T, error)
 	FindMany(ctx context.Context, q query.Condition, p *pagination.Pagination, preloads ...preload.Opt) ([]T, error)
 	FindAll(ctx context.Context, q query.Condition, preloads ...preload.Opt) ([]T, error)
@@ -65,9 +65,11 @@ func (r *Repository[T]) Delete(ctx context.Context, data T) error {
 	return r.DB(ctx).Model(data).Delete(data).Error
 }
 
-func (r *Repository[T]) FindByID(ctx context.Context, id uint) (T, error) {
+func (r *Repository[T]) FindByID(ctx context.Context, id uint, preloads ...preload.Opt) (T, error) {
 	var result T
-	err := r.DB(ctx).Model(result).First(&result, id).Error
+	db := r.DB(ctx).Model(result)
+	db = preload.Group(preloads...).Apply(db)
+	err := db.First(&result, id).Error
 	return result, err
 }
 
