@@ -6,6 +6,7 @@ import (
 	"github.com/qwerty22121998/gobase/base_model"
 	"github.com/qwerty22121998/gobase/pagination"
 	"github.com/qwerty22121998/gobase/query/complex_query"
+	"github.com/qwerty22121998/gobase/query/simple_query"
 	"github.com/qwerty22121998/gobase/test"
 	"github.com/stretchr/testify/assert"
 	"regexp"
@@ -113,7 +114,8 @@ func TestRepository_FindFirst(t *testing.T) {
 		A: "A",
 	}
 
-	q := complex_query.And(complex_query.Equal("a", "A"))
+	cq := complex_query.And(complex_query.Equal("a", "A"))
+	sq := simple_query.New().Equal("a", "A")
 
 	repo := New[*test.ModelA](db)
 
@@ -121,7 +123,14 @@ func TestRepository_FindFirst(t *testing.T) {
 		WithArgs("A").
 		WillReturnRows(mock.NewRows([]string{"id", "a"}).AddRow(data.ID, data.A))
 
-	result, err := repo.FindFirst(context.Background(), q)
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `model_a` WHERE a = ? AND `model_a`.`deleted_at` IS NULL ORDER BY `model_a`.`id` LIMIT 1")).
+		WithArgs("A").
+		WillReturnRows(mock.NewRows([]string{"id", "a"}).AddRow(data.ID, data.A))
+
+	result, err := repo.FindFirst(context.Background(), cq)
+	assert.NoError(t, err)
+	assert.Equal(t, data, result)
+	result, err = repo.FindFirst(context.Background(), sq)
 	assert.NoError(t, err)
 	assert.Equal(t, data, result)
 	assert.NoError(t, mock.ExpectationsWereMet())
