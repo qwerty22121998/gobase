@@ -1,4 +1,4 @@
-package query
+package complex_query
 
 import (
 	"github.com/qwerty22121998/gobase/test"

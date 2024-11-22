@@ -6,7 +6,7 @@ import (
 	"github.com/qwerty22121998/gobase/base_util"
 	"github.com/qwerty22121998/gobase/pagination"
 	"github.com/qwerty22121998/gobase/preload"
-	"github.com/qwerty22121998/gobase/query"
+	"github.com/qwerty22121998/gobase/query/complex_query"
 	"gorm.io/gorm"
 )
 
@@ -20,10 +20,10 @@ type IRepository[T base_model.IModel] interface {
 	Save(ctx context.Context, data T) error
 	Delete(ctx context.Context, data T) error
 	FindByID(ctx context.Context, id uint) (T, error)
-	FindFirst(ctx context.Context, q query.Condition, preloads ...preload.Opt) (T, error)
-	FindMany(ctx context.Context, q query.Condition, p *pagination.Pagination, preloads ...preload.Opt) ([]T, error)
-	FindAll(ctx context.Context, q query.Condition, preloads ...preload.Opt) ([]T, error)
-	Count(ctx context.Context, q query.Condition, preloads ...preload.Opt) (int64, error)
+	FindFirst(ctx context.Context, q complex_query.Query, preloads ...preload.Opt) (T, error)
+	FindMany(ctx context.Context, q complex_query.Query, p *pagination.Pagination, preloads ...preload.Opt) ([]T, error)
+	FindAll(ctx context.Context, q complex_query.Query, preloads ...preload.Opt) ([]T, error)
+	Count(ctx context.Context, q complex_query.Query, preloads ...preload.Opt) (int64, error)
 	BeginTx(ctx context.Context, fn func(ctx context.Context) error) error
 }
 
@@ -71,7 +71,7 @@ func (r *Repository[T]) FindByID(ctx context.Context, id uint) (T, error) {
 	return result, err
 }
 
-func (r *Repository[T]) FindFirst(ctx context.Context, q query.Condition, preloads ...preload.Opt) (T, error) {
+func (r *Repository[T]) FindFirst(ctx context.Context, q complex_query.Query, preloads ...preload.Opt) (T, error) {
 	var result T
 	zero := new(T)
 	db := r.DB(ctx).Model(zero)
@@ -81,7 +81,7 @@ func (r *Repository[T]) FindFirst(ctx context.Context, q query.Condition, preloa
 	return result, err
 }
 
-func (r *Repository[T]) Count(ctx context.Context, q query.Condition, preloads ...preload.Opt) (int64, error) {
+func (r *Repository[T]) Count(ctx context.Context, q complex_query.Query, preloads ...preload.Opt) (int64, error) {
 	var model T
 	db := r.DB(ctx).Model(model)
 	db = preload.Group(preloads...).Apply(db).Scopes(q)
@@ -92,7 +92,7 @@ func (r *Repository[T]) Count(ctx context.Context, q query.Condition, preloads .
 	return total, nil
 }
 
-func (r *Repository[T]) FindAll(ctx context.Context, q query.Condition, preloads ...preload.Opt) ([]T, error) {
+func (r *Repository[T]) FindAll(ctx context.Context, q complex_query.Query, preloads ...preload.Opt) ([]T, error) {
 	res := make([]T, 0)
 	zero := new(T)
 	db := r.DB(ctx).Model(zero)
@@ -104,7 +104,7 @@ func (r *Repository[T]) FindAll(ctx context.Context, q query.Condition, preloads
 	return res, nil
 }
 
-func (r *Repository[T]) FindMany(ctx context.Context, q query.Condition, p *pagination.Pagination, preloads ...preload.Opt) ([]T, error) {
+func (r *Repository[T]) FindMany(ctx context.Context, q complex_query.Query, p *pagination.Pagination, preloads ...preload.Opt) ([]T, error) {
 	p.Correct()
 	res := make([]T, 0)
 	zero := new(T)

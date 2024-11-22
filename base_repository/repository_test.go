@@ -5,7 +5,7 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/qwerty22121998/gobase/base_model"
 	"github.com/qwerty22121998/gobase/pagination"
-	"github.com/qwerty22121998/gobase/query"
+	"github.com/qwerty22121998/gobase/query/complex_query"
 	"github.com/qwerty22121998/gobase/test"
 	"github.com/stretchr/testify/assert"
 	"regexp"
@@ -113,7 +113,7 @@ func TestRepository_FindFirst(t *testing.T) {
 		A: "A",
 	}
 
-	q := query.And(query.Equal("a", "A"))
+	q := complex_query.And(complex_query.Equal("a", "A"))
 
 	repo := New[*test.ModelA](db)
 
@@ -138,7 +138,7 @@ func TestRepository_FindMany(t *testing.T) {
 		A: "A",
 	}
 
-	q := query.And(query.Equal("a", "A"))
+	q := complex_query.And(complex_query.Equal("a", "A"))
 	p := pagination.Pagination{
 		Page:      0,
 		Limit:     10,
@@ -169,7 +169,7 @@ func TestRepository_FindManyFailCount(t *testing.T) {
 	db, mock, err := test.DB()
 	assert.NoError(t, err)
 
-	q := query.And(query.Equal("a", "A"))
+	q := complex_query.And(complex_query.Equal("a", "A"))
 	p := pagination.Pagination{
 		Page:      0,
 		Limit:     10,
@@ -193,7 +193,7 @@ func TestRepository_FindManyFailData(t *testing.T) {
 	db, mock, err := test.DB()
 	assert.NoError(t, err)
 
-	q := query.And(query.Equal("a", "A"))
+	q := complex_query.And(complex_query.Equal("a", "A"))
 	p := pagination.Pagination{
 		Page:      0,
 		Limit:     10,
